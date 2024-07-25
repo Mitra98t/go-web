@@ -27,15 +27,20 @@ export default function Home() {
   };
 
   return (
-    <div className="animationWrapper w-full h-screen flex flex-col items-center gap-4">
+    <div className="animationWrapper w-full h-screen flex flex-col items-center gap-4 bg-base-300">
       <Navbar />
       {user ? (
-        <button onClick={toggleModal}>New Game</button>
+        <button
+          className="btn btn-primary btn-xs sm:btn-sm md:btn-md lg:btn-lg btn-wide"
+          onClick={toggleModal}
+        >
+          New Game
+        </button>
       ) : (
         <p className=" whitespace-nowrap w-fit">Log in to start a new game</p>
       )}
       {modal && <GameSettingsModal toggleModal={toggleModal} />}
-      <GameData />;{" "}
+      <GameData />
     </div>
   );
 }

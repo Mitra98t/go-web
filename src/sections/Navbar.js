@@ -22,18 +22,18 @@ export default function Navbar() {
   };
 
   return (
-    <div className="w-full h-24 bg-slate-500 flex items-center px-12 flex-row-reverse justify-between">
+    <div className="w-full h-24 bg-base-100 flex items-center px-12 flex-row-reverse justify-between">
       {user ? (
         <Link
           to={`/profile/${user.uid}`}
-          className="h-2/3 aspect-square border-2 border-black rounded-full"
+          className="h-2/3 aspect-square border-2 border-primary-content rounded-full"
         >
           <ProfilePic />
         </Link>
       ) : (
         <button onClick={signInWithGoogle}>Login</button>
       )}
-      <Link to="/" className="text-white text-2xl font-bold">
+      <Link to="/" className=" text-2xl font-bold">
         Home
       </Link>
     </div>

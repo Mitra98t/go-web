@@ -31,7 +31,9 @@ export default function GameData({ privateGames = false }) {
   return (
     <div className="w-full h-full flex flex-col sm:flex-row items-center justify-evenly">
       <div className="w-full sm:w-1/3 h-full flex flex-col items-start justify-start gap-6">
-        <h1 className="text-3xl font-bold px-12">{`${privateGames ? 'Personal' : 'Public'} games`}</h1>
+        <h1 className="text-3xl font-bold px-12">{`${
+          privateGames ? "Personal" : "Public"
+        } games`}</h1>
         <div className="flex flex-col gap-3 w-full h-full overflow-y-scroll px-12">
           {(loading || usersLoading) && <p>Loading...</p>}
           {(error || usersError) && <p>Error: {error.message}</p>}
@@ -46,7 +48,7 @@ export default function GameData({ privateGames = false }) {
               <React.Fragment key={doc.id}>
                 <div className="w-full h-fit flex flex-row items-center justify-between gap-3">
                   <Link
-                    className=" border border-slate-300 rounded-2xl  py-3 px-6 flex flex-col items-start gap-3 w-full h-fit"
+                    className="bg-base-100 border-2 border-base-content rounded-2xl  py-3 px-6 flex flex-col items-start gap-3 w-full h-fit"
                     to={
                       !privateGames && doc.data().isPrivate
                         ? "#"
@@ -61,7 +63,7 @@ export default function GameData({ privateGames = false }) {
                           className="flex items-center gap-3"
                         >
                           <div
-                            className={`h-8 w-8 rounded-full ${
+                            className={`h-10 w-10 rounded-full border-2 border-primary ${
                               key === "B" ? "bg-slate-900" : "bg-slate-100"
                             }`}
                           >
@@ -69,7 +71,7 @@ export default function GameData({ privateGames = false }) {
                               <ProfilePic seed={currUser.email} flip />
                             )}
                           </div>
-                          <p>
+                          <p className=" font-semibold text-lg">
                             {currUser.displayName
                               ? currUser.displayName
                               : "Wating for player"}

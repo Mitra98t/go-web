@@ -12,9 +12,14 @@ export default function Profile() {
     }
   }, [user]);
   return (
-    <div className="animationWrapper w-full h-screen flex flex-col items-center gap-4">
+    <div className="animationWrapper w-full h-screen flex flex-col items-center gap-4 bg-base-300">
       <Navbar />
-      <button onClick={() => auth.signOut()}>Logout</button>
+      <button
+        className="btn btn-outline btn-warning"
+        onClick={() => auth.signOut()}
+      >
+        Logout
+      </button>
       <GameData privateGames />
     </div>
   );
