@@ -2,13 +2,12 @@ import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import React, { useState } from "react";
 import { auth, db } from "../firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { useHistory } from 'react-router-dom';
+
 
 const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 
 export default function GameSettingsModal({ toggleModal }) {
   const [user] = useAuthState(auth);
-  const history = useHistory();
   const [size, setSize] = useState(9);
   const [isPrivate, setIsPrivate] = useState(false);
   const [color, setColor] = useState("B");
@@ -35,8 +34,8 @@ export default function GameSettingsModal({ toggleModal }) {
     // copy the game id to the clipboard
     // redirect to the game page
     await delay(200);
-    //window.location.href = `/game/${gameDoc.id}`;
-    history.push('/game/'+ gameDoc.id)
+    window.location.href = `/game/${gameDoc.id}`;
+
   };
 
   return (
