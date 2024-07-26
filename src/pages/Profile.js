@@ -15,7 +15,7 @@ export default function Profile() {
     <div className="animationWrapper w-full h-screen flex flex-col items-center gap-4 bg-base-300">
       <Navbar />
       <button
-        className="btn btn-outline btn-warning"
+        className="btn btn-outline btn-error absolute bottom-4 right-4"
         onClick={() => auth.signOut()}
       >
         Logout

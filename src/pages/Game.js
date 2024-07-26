@@ -1,5 +1,5 @@
 import "../App.css";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Stone from "../components/Stone";
 import { useDocument } from "react-firebase-hooks/firestore";
 import { doc, updateDoc } from "firebase/firestore";
@@ -39,7 +39,7 @@ export default function Game() {
     }
   }, [game, gameID]);
 
-  const isVertialMonitor = window.innerWidth < window.innerHeight;
+  const isVerticalMonitor = useIsWindowVertical();
 
   if (error) {
     return <div>Error: {error.message}</div>;
@@ -49,61 +49,22 @@ export default function Game() {
     return <div>The game does not exists</div>;
   } else
     return (
-      <div className="animationWrapper w-full h-screen flex flex-col sm:flex-row items-center justify-center gap-6">
+      <div
+        className={
+          "animationWrapper bg-base-300 w-full h-screen flex flex-col sm:flex-row items-center justify-center"
+        }
+      >
+        {isVerticalMonitor ? (
+          <div className="w-full h-full flex items-center justify-center p-12">
+            {getPlayerCards(game, isVerticalMonitor)}
+          </div>
+        ) : (
+          <></>
+        )}
         <div className="w-full h-screen flex flex-col items-center justify-center gap-6">
-          <button
-            disabled={
-              game.data().players[game.data().turn] !== auth.currentUser.uid ||
-              game.data().closed ||
-              game.data().players.B === "" ||
-              game.data().players.W === ""
-            }
-            className="p-2 bg-slate-900 text-white rounded-lg"
-            onClick={async () => {
-              if (
-                game.data().players[game.data().turn] !==
-                  auth.currentUser.uid ||
-                game.data().closed
-              ) {
-                return;
-              }
-              let { turn, movesHystory, turnCount, closed } = game.data();
-              if (
-                movesHystory.length > 0 &&
-                movesHystory[movesHystory.length - 1].move === "pass"
-              ) {
-                closed = true;
-              }
-              movesHystory.push({
-                turn,
-                player: turn === "B" ? "black" : "white",
-                move: "pass",
-              });
-              let result;
-              if (closed) {
-                result = calculateScore(
-                  game.data().boardArray,
-                  game.data().boardSize,
-                  game.data().captured
-                );
-              }
-              await updateDoc(doc(db, "games", gameID), {
-                turn: turn === "B" ? "W" : "B",
-                movesHystory,
-                turnCount: turnCount + 1,
-                closed,
-                result: closed
-                  ? { score: result.score, points: result.points }
-                  : { score: { B: 0, W: 0 }, points: { B: [], W: [] } },
-              });
-              console.log(game.data());
-            }}
-          >
-            Pass
-          </button>
           <div
             className={`${
-              isVertialMonitor ? "w-10/12" : "h-3/4"
+              isVerticalMonitor ? "w-10/12" : "h-4/5"
             } aspect-square`}
             id="goban"
           >
@@ -115,7 +76,7 @@ export default function Game() {
                 gridTemplateRows: `repeat(${game.data().boardSize - 1}, 1fr)`,
                 padding: `calc(100%/${game.data().boardSize * 2})`,
               }}
-              className={`relative grid w-full h-full bg-slate-100 border border-gray-300 p-[calc(100%/18)]`}
+              className={`relative grid w-full h-full bg-neutral-content border border-neutral rounded-lg p-[calc(100%/18)]`}
             >
               {Array.from({
                 length:
@@ -123,7 +84,7 @@ export default function Game() {
               }).map((_, index) => (
                 <div
                   key={"canvas " + index}
-                  className="border border-gray-300"
+                  className="border border-neutral"
                 ></div>
               ))}
               <div
@@ -256,51 +217,104 @@ export default function Game() {
               </div>
             </div>
           </div>
-          <button
-            className="p-2 bg-red-500 text-white rounded-lg font-bold"
-            onClick={async () => {
-              let { players, boardArray, boardSize, captured } = game.data();
-
-              let colorForfeit = auth.currentUser.uid === players.B ? "B" : "W";
-
-              let result = calculateScore(boardArray, boardSize, captured);
-
-              result.score[colorForfeit] = 0;
-              result.points[colorForfeit] = [];
-
-              await updateDoc(doc(db, "games", gameID), {
-                closed: true,
-                result,
-              });
-            }}
-          >
-            Forfeit
-          </button>
         </div>
-        <div className="w-fit h-full flex flex-col gap-4 p-12 ">
-          <PlayerCard uid={game.data().players.B} isBlack>
-            {!game.data().closed &&
-              game.data().turn === "B" &&
-              (auth.currentUser.uid === game.data().players.B
-                ? "Your Turn"
-                : "Opponent's Turn")}
-            {game.data().closed && <p>Score {game.data().result.score.B}</p>}
-            {game.data().result.score.B > game.data().result.score.W && (
-              <p className="text-green-400">Winner</p>
+        <div
+          className={
+            " h-full flex flex-col justify-between gap-6 p-12 " +
+            (isVerticalMonitor ? "w-full" : "w-fit")
+          }
+        >
+          <div className={"w-full flex flex-col gap-4 "}>
+            {!isVerticalMonitor ? (
+              getPlayerCards(game, isVerticalMonitor)
+            ) : (
+              <></>
             )}
-          </PlayerCard>
-          <PlayerCard uid={game.data().players.W}>
-            {!game.data().closed &&
-              game.data().turn === "W" &&
-              (auth.currentUser.uid === game.data().players.W
-                ? "Your Turn"
-                : "Opponent's Turn")}
-            {game.data().closed && <p>Score {game.data().result.score.W}</p>}
-            {game.data().result.score.W > game.data().result.score.B && (
-              <p className="text-green-600">Winner</p>
-            )}
-          </PlayerCard>
-          <Link to="/home">Leave Game Room</Link>
+            <button
+              disabled={
+                game.data().players[game.data().turn] !==
+                  auth.currentUser.uid ||
+                game.data().closed ||
+                game.data().players.B === "" ||
+                game.data().players.W === ""
+              }
+              className="btn btn-secondary"
+              onClick={async () => {
+                if (
+                  game.data().players[game.data().turn] !==
+                    auth.currentUser.uid ||
+                  game.data().closed
+                ) {
+                  return;
+                }
+                let { turn, movesHystory, turnCount, closed } = game.data();
+                if (
+                  movesHystory.length > 0 &&
+                  movesHystory[movesHystory.length - 1].move === "pass"
+                ) {
+                  closed = true;
+                }
+                movesHystory.push({
+                  turn,
+                  player: turn === "B" ? "black" : "white",
+                  move: "pass",
+                });
+                let result;
+                if (closed) {
+                  result = calculateScore(
+                    game.data().boardArray,
+                    game.data().boardSize,
+                    game.data().captured
+                  );
+                }
+                await updateDoc(doc(db, "games", gameID), {
+                  turn: turn === "B" ? "W" : "B",
+                  movesHystory,
+                  turnCount: turnCount + 1,
+                  closed,
+                  result: closed
+                    ? { score: result.score, points: result.points }
+                    : { score: { B: 0, W: 0 }, points: { B: [], W: [] } },
+                });
+                console.log(game.data());
+              }}
+            >
+              Pass
+            </button>
+          </div>
+
+          <div className="w-full flex flex-col gap-2">
+            <Link className="btn btn-outline btn-secondary" to="/home">
+              Leave Game Room
+            </Link>
+            <button
+              className={
+                "btn btn-error text-white rounded-lg font-bold" +
+                (game.data().closed ? " btn-disabled" : "")
+              }
+              onClick={async () => {
+                if (game.data().closed) {
+                  return;
+                }
+                let { players, boardArray, boardSize, captured } = game.data();
+
+                let colorForfeit =
+                  auth.currentUser.uid === players.B ? "B" : "W";
+
+                let result = calculateScore(boardArray, boardSize, captured);
+
+                result.score[colorForfeit] = 0;
+                result.points[colorForfeit] = [];
+
+                await updateDoc(doc(db, "games", gameID), {
+                  closed: true,
+                  result,
+                });
+              }}
+            >
+              Forfeit
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -498,4 +512,73 @@ function pointsBFSearch(boardArray, boardSize, index) {
   }
 
   return Array.from(visited);
+}
+
+function getPlayerCards(game, isVerticalMonitor) {
+  return (
+    <div
+      className={
+        isVerticalMonitor
+          ? "w-full h-full flex flex-row items-center justify-evenly gap-2"
+          : "w-fit flex flex-col items-center justify-evenly gap-2"
+      }
+    >
+      <PlayerCard
+        uid={game.data().players.B}
+        isBlack
+        isVerticalMonitor={isVerticalMonitor}
+      >
+        {!game.data().closed &&
+          game.data().turn === "B" &&
+          (auth.currentUser.uid === game.data().players.B
+            ? "Your Turn"
+            : "Opponent's Turn")}
+        {game.data().closed && <p>Score {game.data().result.score.B}</p>}
+        {game.data().result.score.B > game.data().result.score.W && (
+          <p className="text-green-400">Winner</p>
+        )}
+      </PlayerCard>
+      <PlayerCard
+        uid={game.data().players.W}
+        isVerticalMonitor={isVerticalMonitor}
+      >
+        {!game.data().closed &&
+          game.data().turn === "W" &&
+          (auth.currentUser.uid === game.data().players.W
+            ? "Your Turn"
+            : "Opponent's Turn")}
+        {game.data().closed && <p>Score {game.data().result.score.W}</p>}
+        {game.data().result.score.W > game.data().result.score.B && (
+          <p className="text-green-600">Winner</p>
+        )}
+      </PlayerCard>
+    </div>
+  );
+}
+
+function getWindowDimensions() {
+  const { innerWidth: width, innerHeight: height } = window;
+  return {
+    width,
+    height,
+  };
+}
+
+function isVertical() {
+  return getWindowDimensions().width < getWindowDimensions().height;
+}
+
+function useIsWindowVertical() {
+  const [windowDimensions, setWindowDimensions] = useState(isVertical());
+
+  useEffect(() => {
+    function handleResize() {
+      setWindowDimensions(isVertical());
+    }
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  return windowDimensions;
 }

@@ -31,7 +31,7 @@ export default function Home() {
       <Navbar />
       {user ? (
         <button
-          className="btn btn-primary btn-xs sm:btn-sm md:btn-md lg:btn-lg btn-wide"
+          className="btn btn-primary btn-sm md:btn-md lg:btn-lg btn-wide"
           onClick={toggleModal}
         >
           New Game

@@ -4,7 +4,13 @@ import { useCollectionOnce } from "react-firebase-hooks/firestore";
 import { db } from "../firebase";
 import ProfilePic from "./ProfilePic";
 
-export default function PlayerCard({ uid, isBlack = false, turn, children }) {
+export default function PlayerCard({
+  uid,
+  isBlack = false,
+  isVerticalMonitor,
+  turn,
+  children,
+}) {
   const [users, usersLoading, usersError, usersReload] = useCollectionOnce(
     collection(db, "users")
   );
@@ -27,13 +33,20 @@ export default function PlayerCard({ uid, isBlack = false, turn, children }) {
 
   return (
     <div
-      className={`w-full h-fit ${
-        isBlack ? "text-slate-100 bg-slate-900" : "bg-slate-200"
-      } p-6 gap-3 rounded-2xl ${
-        isBlack && turn && "ring-4 ring-slate-300"
+      className={`w-full h-full border-primary border-2 ${
+        isBlack
+          ? "text-slate-100 bg-slate-900"
+          : "bg-slate-200 text-slate-900 font-medium"
+      } ${isVerticalMonitor?"py-2 px-4":"p-6"} gap-3 rounded-2xl ${
+        isBlack && turn && "ring-4 ring-secondary"
       } whitespace-nowrap flex flex-col items-start justify-start gap-3`}
     >
-      <div className="flex items-center justify-start gap-3">
+      <div
+        className={
+          "w-full gap-3 " +
+          (isVerticalMonitor ? "flex flex-col justify-start" : "flex flex-row")
+        }
+      >
         {uid ? (
           <>
             <div className="w-8 aspect-square">
@@ -45,7 +58,9 @@ export default function PlayerCard({ uid, isBlack = false, turn, children }) {
           <>
             <div
               className={`w-8 aspect-square rounded-full ${
-                isBlack ? "bg-slate-200" : "bg-slate-900"
+                isBlack
+                  ? "text-slate-100 bg-slate-900"
+                  : "bg-slate-200 text-slate-900 font-medium"
               }`}
             ></div>
             {"Waiting for player..."}

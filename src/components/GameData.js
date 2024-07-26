@@ -29,7 +29,7 @@ export default function GameData({ privateGames = false }) {
   }
 
   return (
-    <div className="w-full h-full flex flex-col sm:flex-row items-center justify-evenly">
+    <div className="w-full h-full flex flex-col sm:flex-row items-center justify-evenly animationWrapper">
       <div className="w-full sm:w-1/3 h-full flex flex-col items-start justify-start gap-6">
         <h1 className="text-3xl font-bold px-12">{`${
           privateGames ? "Personal" : "Public"
@@ -48,7 +48,7 @@ export default function GameData({ privateGames = false }) {
               <React.Fragment key={doc.id}>
                 <div className="w-full h-fit flex flex-row items-center justify-between gap-3">
                   <Link
-                    className="bg-base-100 border-2 border-base-content rounded-2xl  py-3 px-6 flex flex-col items-start gap-3 w-full h-fit"
+                    className="bg-base-100 border-2 border-base-content hover:border-primary rounded-2xl  py-3 px-6 flex flex-col items-start gap-3 w-full h-fit"
                     to={
                       !privateGames && doc.data().isPrivate
                         ? "#"

@@ -26,14 +26,14 @@ export default function Navbar() {
       {user ? (
         <Link
           to={`/profile/${user.uid}`}
-          className="h-2/3 aspect-square border-2 border-primary-content rounded-full"
+          className="h-2/3 aspect-square border-2 border-primary rounded-full"
         >
           <ProfilePic />
         </Link>
       ) : (
         <button onClick={signInWithGoogle}>Login</button>
       )}
-      <Link to="/" className=" text-2xl font-bold">
+      <Link to="/" className=" text-2xl font-bold text-base-content">
         Home
       </Link>
     </div>
