@@ -3,6 +3,8 @@ import React, { useState } from "react";
 import { auth, db } from "../firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
 
+const delay = (ms) => new Promise((res) => setTimeout(res, ms));
+
 export default function GameSettingsModal({ toggleModal }) {
   const [user] = useAuthState(auth);
 
@@ -31,6 +33,7 @@ export default function GameSettingsModal({ toggleModal }) {
     });
     // copy the game id to the clipboard
     // redirect to the game page
+    await delay(200);
     window.location.href = `/game/${gameDoc.id}`;
   };
 
