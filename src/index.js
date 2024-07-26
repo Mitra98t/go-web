@@ -27,10 +27,10 @@ const router = createBrowserRouter([
     path: "/profile/:userId",
     element: <Profile />,
   },
-  // {
-  //   path: "*",
-  //   element: <NotFound />,
-  // },
+  {
+    path: "*",
+    element: <NotFound />,
+  },
 ]);
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
