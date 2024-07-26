@@ -41,6 +41,64 @@ export default function Game() {
 
   const isVerticalMonitor = useIsWindowVertical();
 
+  const onForfait = async () => {
+    if (game.data().closed) {
+      return;
+    }
+    let { players, boardArray, boardSize, captured } = game.data();
+
+    let colorForfeit = auth.currentUser.uid === players.B ? "B" : "W";
+
+    let result = calculateScore(boardArray, boardSize, captured);
+
+    result.score[colorForfeit] = 0;
+    result.points[colorForfeit] = [];
+
+    await updateDoc(doc(db, "games", gameID), {
+      closed: true,
+      result,
+    });
+  };
+
+  const onPass = async () => {
+    if (
+      game.data().players[game.data().turn] !== auth.currentUser.uid ||
+      game.data().closed
+    ) {
+      return;
+    }
+    let { turn, movesHystory, turnCount, closed } = game.data();
+    if (
+      movesHystory.length > 0 &&
+      movesHystory[movesHystory.length - 1].move === "pass"
+    ) {
+      closed = true;
+    }
+    movesHystory.push({
+      turn,
+      player: turn === "B" ? "black" : "white",
+      move: "pass",
+    });
+    let result;
+    if (closed) {
+      result = calculateScore(
+        game.data().boardArray,
+        game.data().boardSize,
+        game.data().captured
+      );
+    }
+    await updateDoc(doc(db, "games", gameID), {
+      turn: turn === "B" ? "W" : "B",
+      movesHystory,
+      turnCount: turnCount + 1,
+      closed,
+      result: closed
+        ? { score: result.score, points: result.points }
+        : { score: { B: 0, W: 0 }, points: { B: [], W: [] } },
+    });
+    console.log(game.data());
+  };
+
   if (error) {
     return <div>Error: {error.message}</div>;
   } else if (loading) {
@@ -50,21 +108,31 @@ export default function Game() {
   } else
     return (
       <div
-        className={
-          "animationWrapper bg-base-300 w-full h-screen flex flex-col sm:flex-row items-center justify-center"
-        }
+        className={`animationWrapper bg-base-300 w-full h-dvh flex ${
+          isVerticalMonitor
+            ? " flex-col p-4 gap-4 justify-evenly "
+            : " flex-row justify-end "
+        } items-center `}
       >
+        {/* Player cards on top on mobile */}
         {isVerticalMonitor ? (
-          <div className="w-full h-full flex items-center justify-center p-12">
+          <div className="w-full">
             {getPlayerCards(game, isVerticalMonitor)}
           </div>
         ) : (
           <></>
         )}
-        <div className="w-full h-screen flex flex-col items-center justify-center gap-6">
+        {/* GOBAN */}
+        <div
+          className={`${
+            isVerticalMonitor
+              ? "w-full"
+              : "h-full w-full flex items-center justify-center "
+          }`}
+        >
           <div
             className={`${
-              isVerticalMonitor ? "w-10/12" : "h-4/5"
+              isVerticalMonitor ? "w-full" : "h-4/5"
             } aspect-square`}
             id="goban"
           >
@@ -207,10 +275,10 @@ export default function Game() {
                   >
                     {cell !== "" ? <Stone isWhite={cell === "W"} /> : <></>}
                     {game.data().result.points.B.includes(index) && (
-                      <div className="bg-slate-900 rounded-md w-1/2 aspect-square"></div>
+                      <div className="bg-slate-900 opacity-70 rounded-md w-1/2 aspect-square"></div>
                     )}
                     {game.data().result.points.W.includes(index) && (
-                      <div className="bg-slate-200 rounded-md border border-slate-500 w-1/2 aspect-square "></div>
+                      <div className="bg-slate-200 opacity-70 rounded-md border border-slate-500 w-1/2 aspect-square "></div>
                     )}
                   </button>
                 ))}
@@ -218,102 +286,70 @@ export default function Game() {
             </div>
           </div>
         </div>
+
+        {/* Extra bar for interactions */}
         <div
-          className={
-            " h-full flex flex-col justify-between gap-6 p-12 " +
-            (isVerticalMonitor ? "w-full" : "w-fit")
-          }
+          className={`${isVerticalMonitor ? "w-full" : "w-fit p-12"} h-full`}
         >
-          <div className={"w-full flex flex-col gap-4 "}>
+          <div className="w-full h-full flex flex-col justify-between items-center">
             {!isVerticalMonitor ? (
-              getPlayerCards(game, isVerticalMonitor)
+              <div className="flex flex-col items-center justify-start gap-6">
+                {getPlayerCards(game, isVerticalMonitor)}
+                <button
+                  disabled={
+                    game.data().players[game.data().turn] !==
+                      auth.currentUser.uid ||
+                    game.data().closed ||
+                    game.data().players.B === "" ||
+                    game.data().players.W === ""
+                  }
+                  className="btn w-full btn-secondary"
+                  onClick={onPass}
+                >
+                  Pass
+                </button>
+              </div>
             ) : (
-              <></>
-            )}
-            <button
-              disabled={
-                game.data().players[game.data().turn] !==
-                  auth.currentUser.uid ||
-                game.data().closed ||
-                game.data().players.B === "" ||
-                game.data().players.W === ""
-              }
-              className="btn btn-secondary"
-              onClick={async () => {
-                if (
+              <button
+                disabled={
                   game.data().players[game.data().turn] !==
                     auth.currentUser.uid ||
-                  game.data().closed
-                ) {
-                  return;
+                  game.data().closed ||
+                  game.data().players.B === "" ||
+                  game.data().players.W === ""
                 }
-                let { turn, movesHystory, turnCount, closed } = game.data();
-                if (
-                  movesHystory.length > 0 &&
-                  movesHystory[movesHystory.length - 1].move === "pass"
-                ) {
-                  closed = true;
-                }
-                movesHystory.push({
-                  turn,
-                  player: turn === "B" ? "black" : "white",
-                  move: "pass",
-                });
-                let result;
-                if (closed) {
-                  result = calculateScore(
-                    game.data().boardArray,
-                    game.data().boardSize,
-                    game.data().captured
-                  );
-                }
-                await updateDoc(doc(db, "games", gameID), {
-                  turn: turn === "B" ? "W" : "B",
-                  movesHystory,
-                  turnCount: turnCount + 1,
-                  closed,
-                  result: closed
-                    ? { score: result.score, points: result.points }
-                    : { score: { B: 0, W: 0 }, points: { B: [], W: [] } },
-                });
-                console.log(game.data());
-              }}
+                className="btn btn-wide btn-secondary"
+                onClick={onPass}
+              >
+                Pass
+              </button>
+            )}
+
+            <div
+              className={`w-full flex ${
+                isVerticalMonitor ? " flex-row " : " flex-col "
+              } items-center justify-center gap-2`}
             >
-              Pass
-            </button>
-          </div>
-
-          <div className="w-full flex flex-col gap-2">
-            <Link className="btn btn-outline btn-secondary" to="/home">
-              Leave Game Room
-            </Link>
-            <button
-              className={
-                "btn btn-error text-white rounded-lg font-bold" +
-                (game.data().closed ? " btn-disabled" : "")
-              }
-              onClick={async () => {
-                if (game.data().closed) {
-                  return;
+              <Link
+                className={`btn ${
+                  isVerticalMonitor ? " " : " w-full "
+                } btn-outline btn-secondary`}
+                to="/home"
+              >
+                Leave Game Room
+              </Link>
+              <button
+                className={
+                  "btn " +
+                  (isVerticalMonitor ? " " : " w-full ") +
+                  " btn-error text-white rounded-lg font-bold" +
+                  (game.data().closed ? " btn-disabled" : "")
                 }
-                let { players, boardArray, boardSize, captured } = game.data();
-
-                let colorForfeit =
-                  auth.currentUser.uid === players.B ? "B" : "W";
-
-                let result = calculateScore(boardArray, boardSize, captured);
-
-                result.score[colorForfeit] = 0;
-                result.points[colorForfeit] = [];
-
-                await updateDoc(doc(db, "games", gameID), {
-                  closed: true,
-                  result,
-                });
-              }}
-            >
-              Forfeit
-            </button>
+                onClick={onForfait}
+              >
+                Forfeit
+              </button>
+            </div>
           </div>
         </div>
       </div>

@@ -37,14 +37,14 @@ export default function PlayerCard({
         isBlack
           ? "text-slate-100 bg-slate-900"
           : "bg-slate-200 text-slate-900 font-medium"
-      } ${isVerticalMonitor?"py-2 px-4":"p-6"} gap-3 rounded-2xl ${
+      } ${isVerticalMonitor ? " py-2 px-4 " : " p-6 gap-3"}  rounded-2xl ${
         isBlack && turn && "ring-4 ring-secondary"
-      } whitespace-nowrap flex flex-col items-start justify-start gap-3`}
+      }  flex flex-col items-start justify-start`}
     >
       <div
         className={
-          "w-full gap-3 " +
-          (isVerticalMonitor ? "flex flex-col justify-start" : "flex flex-row")
+          "w-full flex flex-row " +
+          (isVerticalMonitor ? " gap-2 " : " gap-3 whitespace-nowrap")
         }
       >
         {uid ? (
