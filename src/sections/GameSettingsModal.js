@@ -34,7 +34,8 @@ export default function GameSettingsModal({ toggleModal }) {
     // copy the game id to the clipboard
     // redirect to the game page
     await delay(200);
-    window.location.href = `/game/${gameDoc.id}`;
+    //window.location.href = `/game/${gameDoc.id}`;
+    history.push('/game/'+ gameDoc.id)
   };
 
   return (
