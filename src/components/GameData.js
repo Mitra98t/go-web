@@ -49,7 +49,11 @@ export default function GameData({ privateGames = false }) {
                 (doc) => !doc.data().closed || doc.data().createdBy == user.uid,
               )
               .sort((a, _) => {
-                if (a.data().players.includes("")) {
+                if (
+                  a.data() &&
+                  a.data().players &&
+                  a.data().players.includes("")
+                ) {
                   return -1;
                 } else {
                   return 1;
