@@ -16,7 +16,7 @@ export default function GameData({ privateGames = false }) {
   });
 
   const [users, usersLoading, usersError, usersReload] = useCollectionOnce(
-    collection(db, "users")
+    collection(db, "users"),
   );
 
   function getUserData(uid) {
@@ -41,54 +41,68 @@ export default function GameData({ privateGames = false }) {
             users &&
             (privateGames
               ? games.docs.filter((doc) =>
-                  Object.values(doc.data().players).includes(user.uid)
+                  Object.values(doc.data().players).includes(user.uid),
                 )
               : games.docs.filter((doc) => !doc.data().isPrivate)
-            ).map((doc) => (
-              <React.Fragment key={doc.id}>
-                <div className="w-full h-fit flex flex-row items-center justify-between gap-3">
-                  <Link
-                    className="bg-base-100 border-2 border-base-content hover:border-primary rounded-2xl  py-3 px-6 flex flex-col items-start gap-3 w-full h-fit"
-                    to={
-                      !privateGames && doc.data().isPrivate
-                        ? "#"
-                        : `/game/${doc.id}`
-                    }
-                  >
-                    {Object.keys(doc.data().players).map((key) => {
-                      let currUser = getUserData(doc.data().players[key]);
-                      return (
-                        <div
-                          key={currUser.id}
-                          className="flex items-center gap-3"
-                        >
+            )
+              .filter(
+                (doc) => !doc.data().closed || doc.data().createdBy == user.uid,
+              )
+              .sort((a, _) => {
+                if (a.data().players.includes("")) {
+                  return -1;
+                } else {
+                  return 1;
+                }
+              })
+              .map((doc) => (
+                <React.Fragment key={doc.id}>
+                  <div className="w-full h-fit flex flex-row items-center justify-between gap-3">
+                    <Link
+                      className="bg-base-100 border-2 border-base-content hover:border-primary rounded-2xl  py-3 px-6 flex flex-col items-start gap-3 w-full h-fit"
+                      to={
+                        !privateGames && doc.data().isPrivate
+                          ? "#"
+                          : `/game/${doc.id}`
+                      }
+                    >
+                      {Object.keys(doc.data().players).map((key) => {
+                        let currUser = getUserData(doc.data().players[key]);
+                        return (
                           <div
-                            className={`h-10 w-10 rounded-full border-2 border-primary ${
-                              key === "B" ? "bg-slate-900" : "bg-slate-100"
-                            }`}
+                            key={currUser.id}
+                            className="flex items-center gap-3"
                           >
-                            {currUser.email && (
-                              <ProfilePic seed={currUser.email} flip />
-                            )}
+                            <div
+                              className={`h-10 w-10 rounded-full border-2 border-primary ${
+                                key === "B" ? "bg-slate-900" : "bg-slate-100"
+                              }`}
+                            >
+                              {currUser.email && (
+                                <ProfilePic seed={currUser.email} flip />
+                              )}
+                            </div>
+                            <p className=" font-semibold text-lg">
+                              {currUser.displayName
+                                ? currUser.displayName
+                                : "Wating for player"}
+                            </p>
                           </div>
-                          <p className=" font-semibold text-lg">
-                            {currUser.displayName
-                              ? currUser.displayName
-                              : "Wating for player"}
-                          </p>
-                        </div>
-                      );
-                    })}
-                    <p>{`Board size ${doc.data().boardSize}`}</p>
-                  </Link>
-                  {privateGames && doc.data().createdBy === user.uid && (
-                    <button className="" onClick={() => deleteGame(doc.id)}>
-                      X
-                    </button>
-                  )}
-                </div>
-              </React.Fragment>
-            ))}
+                        );
+                      })}
+                      <p>{`Board size ${doc.data().boardSize}`}</p>
+                    </Link>
+                    {privateGames && doc.data().createdBy === user.uid && (
+                      <button
+                        className=" font-bold"
+                        onClick={() => deleteGame(doc.id)}
+                      >
+                        X
+                      </button>
+                    )}
+                  </div>
+                </React.Fragment>
+              ))}
         </div>
       </div>
       <div className="w-full sm:w-2/3 h-full">

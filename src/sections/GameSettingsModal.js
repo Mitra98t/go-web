@@ -82,11 +82,21 @@ export default function GameSettingsModal({ toggleModal }) {
               name="color"
               value={color}
               onChange={(e) => {
+                if (e.target.value == "X") {
+                  let random = Math.random() > 0.5;
+                  if (random) {
+                    setColor("W");
+                    return;
+                  }
+                  setColor("B");
+                  return;
+                }
                 setColor(e.target.value);
               }}
             >
               <option value="B">Black</option>
               <option value="W">White</option>
+              <option value="X">Random</option>
             </select>
           </div>
         </div>

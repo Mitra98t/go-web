@@ -84,7 +84,7 @@ export default function Game() {
       result = calculateScore(
         game.data().boardArray,
         game.data().boardSize,
-        game.data().captured
+        game.data().captured,
       );
     }
     await updateDoc(doc(db, "games", gameID), {
@@ -192,7 +192,7 @@ export default function Game() {
                           game.data().boardArray,
                           game.data().boardSize,
                           index,
-                          game.data().turn
+                          game.data().turn,
                         )
                       ) {
                         return;
@@ -204,7 +204,7 @@ export default function Game() {
                           game.data().boardArray,
                           game.data().boardSize,
                           index,
-                          game.data().turn
+                          game.data().turn,
                         )
                       ) {
                         return;
@@ -214,7 +214,7 @@ export default function Game() {
                         game.data().boardArray,
                         game.data().boardSize,
                         index,
-                        game.data().turn
+                        game.data().turn,
                       );
 
                       let newBoardArray = [...game.data().boardArray];
@@ -229,7 +229,7 @@ export default function Game() {
                           newBoardArray,
                           game.data().boardSize,
                           index,
-                          game.data().turn
+                          game.data().turn,
                         )
                       ) {
                         return;
@@ -387,7 +387,7 @@ function getCapturedCells(boardArray, boardSize, index, turn) {
         simulatedBoard,
         boardSize,
         cell,
-        boardArray[cell]
+        boardArray[cell],
       );
       if (!res.hasLiberty) {
         capturedGroups = capturedGroups.concat(res.groupStones);
@@ -502,14 +502,14 @@ function calculateScore(boardArray, boardSize, captured) {
     let currSearch = search.filter((x) => boardArray[x] !== "");
     if (currSearch.every((cell) => boardArray[cell] === "B")) {
       let resultSearch = search.filter(
-        (x) => boardArray[x] === "" || boardArray[x] === "W"
+        (x) => boardArray[x] === "" || boardArray[x] === "W",
       );
       score.B += resultSearch.length;
       points.B = points.B.concat(resultSearch);
     }
     if (currSearch.every((cell) => boardArray[cell] === "W")) {
       let resultSearch = search.filter(
-        (x) => boardArray[x] === "" || boardArray[x] === "B"
+        (x) => boardArray[x] === "" || boardArray[x] === "B",
       );
       score.W += resultSearch.length;
       points.W = points.W.concat(resultSearch);
@@ -564,6 +564,7 @@ function getPlayerCards(game, isVerticalMonitor) {
         isBlack
         isVerticalMonitor={isVerticalMonitor}
       >
+        {<p>{`Captured ${game.data().captured.black}`}</p>}
         {!game.data().closed &&
           game.data().turn === "B" &&
           (auth.currentUser.uid === game.data().players.B
@@ -578,6 +579,7 @@ function getPlayerCards(game, isVerticalMonitor) {
         uid={game.data().players.W}
         isVerticalMonitor={isVerticalMonitor}
       >
+        {<p>{`Captured ${game.data().captured.white}`}</p>}
         {!game.data().closed &&
           game.data().turn === "W" &&
           (auth.currentUser.uid === game.data().players.W
